@@ -94,6 +94,16 @@ export async function generateVirtualTryOn(
           { text: prompt },
         ],
       },
+      config: {
+        // Wir setzen die Sicherheitsfilter so, dass sie weniger restriktiv sind, 
+        // um Fehlalarme bei Modefotos zu vermeiden.
+        safetySettings: [
+          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
+        ] as any
+      }
     });
 
     if (!response.candidates?.[0]?.content?.parts) {
@@ -143,7 +153,23 @@ export async function generateVirtualTryOn(
       recommendations
     };
   } catch (error: any) {
-    console.error("Gemini API Error:", error);
-    throw new Error("Der KI-Stylist ist gerade überlastet. Bitte versuche es gleich noch einmal.");
+    console.error("Gemini API Error Details:", error);
+    
+    // Spezifische Fehlermeldungen basierend auf dem API-Fehler
+    const errorMsg = error?.message || "";
+    
+    if (errorMsg.includes("429") || errorMsg.toLowerCase().includes("rate limit")) {
+      throw new Error("Zu viele Anfragen auf einmal. Bitte warte 1 Minute und versuche es dann erneut (Free-Tier Limit).");
+    }
+    
+    if (errorMsg.toLowerCase().includes("safety") || errorMsg.toLowerCase().includes("blocked")) {
+      throw new Error("Das Bild wurde von den Sicherheitsfiltern blockiert. Bitte achte darauf, dass das Foto angemessen ist und keine geschützten Inhalte zeigt.");
+    }
+
+    if (errorMsg.includes("503") || errorMsg.toLowerCase().includes("overloaded")) {
+      throw new Error("Der Google-Server ist gerade überlastet. Bitte versuche es in ein paar Sekunden noch einmal.");
+    }
+
+    throw new Error(`KI-Fehler: ${errorMsg || "Ein unbekannter Fehler ist aufgetreten. Bitte versuche es mit einem anderen Foto."}`);
   }
 }
