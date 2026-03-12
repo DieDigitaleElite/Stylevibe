@@ -36,11 +36,16 @@ export async function generateVirtualTryOn(
   style: StyleType,
   fullMakeover: boolean = false
 ): Promise<StylingResult> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  // Versuche verschiedene Wege, den Key zu finden (Vite-Standard vs. Custom Define)
+  const apiKey = process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY;
   
-  if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
-    throw new Error("API-Key fehlt. Bitte stelle sicher, dass GEMINI_API_KEY in den Umgebungsvariablen (z.B. in Vercel) gesetzt ist.");
+  if (!apiKey || apiKey === "MY_GEMINI_API_KEY" || apiKey === "undefined" || apiKey === "null") {
+    console.error("API Key Check failed. Value:", apiKey);
+    throw new Error("API-Key nicht gefunden. Bitte prüfe die Vercel-Umgebungsvariablen.");
   }
+
+  // Diagnose-Log (nur die ersten 4 Zeichen zur Sicherheit)
+  console.log("API Key geladen (Anfang):", apiKey.substring(0, 4) + "...");
 
   const ai = new GoogleGenAI({ apiKey });
   const model = "gemini-2.5-flash-image";
