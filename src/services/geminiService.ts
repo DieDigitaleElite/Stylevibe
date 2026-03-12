@@ -54,6 +54,10 @@ export async function generateVirtualTryOn(
   const base64Data = resizedImage.split(',')[1];
 
   const prompt = `
+    DU BIST EIN HIGH-END KI-STYLIST. DEINE AUFGABE IST ES, EIN NEUES BILD ZU GENERIEREN.
+    
+    AKTION: Erzeuge ein neues Bild basierend auf dem hochgeladenen Foto.
+    
     STYLING-ANWEISUNG:
     Führe ein virtuelles Try-On durch, indem du NUR die Kleidung (und optional Haare/Make-up) änderst.
     
@@ -111,19 +115,30 @@ export async function generateVirtualTryOn(
     }
 
     let editedImageUrl = "";
-    let description = "";
+    let textResponse = "";
 
     for (const part of response.candidates[0].content.parts) {
       if (part.inlineData) {
         editedImageUrl = `data:image/png;base64,${part.inlineData.data}`;
       } else if (part.text) {
-        description += part.text;
+        textResponse += part.text;
       }
     }
 
     if (!editedImageUrl) {
-      throw new Error("Das gestylte Bild konnte nicht generiert werden.");
+      console.warn("KI hat kein Bild generiert. Text-Antwort war:", textResponse);
+      
+      // Wenn die KI Text geschickt hat, der auf eine Ablehnung hindeutet
+      if (textResponse.toLowerCase().includes("entschuldigung") || 
+          textResponse.toLowerCase().includes("kann nicht") ||
+          textResponse.toLowerCase().includes("darf nicht")) {
+        throw new Error(`Die KI hat die Bearbeitung abgelehnt: ${textResponse.substring(0, 100)}...`);
+      }
+      
+      throw new Error("Die KI hat zwar geantwortet, aber kein Bild generiert. Versuche es mit einem deutlicheren Foto (Person frontal, gute Belichtung).");
     }
+
+    const description = textResponse;
 
     // Schnelle Generierung von passenden (simulierten) Produkten für maximale Geschwindigkeit
     const recommendations: Product[] = [
