@@ -52,9 +52,9 @@ export default function App() {
     try {
       const stylingResult = await generateVirtualTryOn(image, selectedStyle, fullMakeover);
       setResult(stylingResult);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError("Etwas ist schiefgelaufen. Bitte versuche es mit einem anderen Foto erneut.");
+      setError(err.message || "Etwas ist schiefgelaufen. Bitte versuche es mit einem anderen Foto erneut.");
     } finally {
       setIsProcessing(false);
     }

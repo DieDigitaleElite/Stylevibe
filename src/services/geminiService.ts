@@ -36,7 +36,13 @@ export async function generateVirtualTryOn(
   style: StyleType,
   fullMakeover: boolean = false
 ): Promise<StylingResult> {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  const apiKey = process.env.GEMINI_API_KEY;
+  
+  if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
+    throw new Error("API-Key fehlt. Bitte stelle sicher, dass GEMINI_API_KEY in den Umgebungsvariablen (z.B. in Vercel) gesetzt ist.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
   const model = "gemini-2.5-flash-image";
 
   const resizedImage = await resizeImage(base64Image);
