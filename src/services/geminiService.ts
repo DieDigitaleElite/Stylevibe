@@ -54,34 +54,17 @@ export async function generateVirtualTryOn(
   const base64Data = resizedImage.split(',')[1];
 
   const prompt = `
-    DU BIST EIN HIGH-END KI-STYLIST. DEINE AUFGABE IST ES, EIN NEUES BILD ZU GENERIEREN.
+    TASK: Virtual Try-On.
+    STYLE: ${style}
     
-    AKTION: Erzeuge ein neues Bild basierend auf dem hochgeladenen Foto.
+    INSTRUCTIONS:
+    1. Take the person from the uploaded image.
+    2. Change their outfit to a high-end, fashionable "${style}" look.
+    3. Keep the person's face, hair, and body shape exactly as they are in the original photo.
+    4. Output the result as a photorealistic image.
     
-    STYLING-ANWEISUNG:
-    Führe ein virtuelles Try-On durch, indem du NUR die Kleidung (und optional Haare/Make-up) änderst.
-    
-    KRITISCHE REGEL - GESICHTS-IDENTITÄT:
-    Das Gesicht der Person darf unter KEINEN Umständen verändert werden. 
-    - Kopiere das Gesicht 1:1 aus dem Originalbild.
-    - Ändere KEINE Gesichtszüge, Augenfarbe, Nasenform oder Lippen.
-    - Führe KEINE "Verschönerung" (Beautification) durch, die die Identität verändert.
-    - Die Person muss im Ergebnis exakt so aussehen wie auf dem Originalfoto.
-    
-    ${fullMakeover ? `
-    KOMPLETTES UMSTYLING (NUR HAARE & MAKE-UP):
-    1. Ändere die Frisur passend zum ${style}-Stil.
-    2. Füge Make-up hinzu, aber achte darauf, dass die darunterliegenden Gesichtszüge identisch bleiben.
-    ` : `
-    STRENGES OUTFIT-ONLY:
-    1. Behalte Gesicht, Haare, Kopf und Pose EXAKT so bei, wie sie im Original sind.
-    2. Ändere ausschließlich die Kleidung.
-    `}
-    
-    OUTFIT-TRANSFORMATION:
-    1. Ersetze die Kleidung durch ein High-Fashion "${style}" Outfit.
-    2. Das Ergebnis muss fotorealistisch sein und wie ein echtes Foto wirken.
-    3. Gib einen kurzen Styling-Tipp auf Deutsch ab.
+    IMPORTANT: You MUST return an image part in your response.
+    Also, provide a short styling tip in German.
   `;
 
   try {
