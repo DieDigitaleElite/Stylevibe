@@ -1,0 +1,7 @@
+{
+  "name": "StyleVibe AI",
+  "description": "AI-powered virtual try-on and personal stylist. Upload your photo, get a virtual makeover, and shop curated looks tailored to your style.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
